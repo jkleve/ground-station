@@ -1,4 +1,8 @@
 pygame==1.9.3
+future==0.16.0
+iso8601==0.1.12
+PyYAML==3.12
+serial==0.0.38
 
 /home/jesse/code/pygame_controller
 
