@@ -1,0 +1,4 @@
+pygame==1.9.3
+
+/home/jesse/code/pygame_controller
+
