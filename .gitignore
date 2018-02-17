@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.log
+
+# Environments
+.venv
+venv/
+
+# Pycharm
+.idea/
+
+# pipenv
+Pipfile
+
