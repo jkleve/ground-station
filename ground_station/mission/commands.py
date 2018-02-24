@@ -11,7 +11,7 @@ from service import Service, ServiceManager
 
 class Commanding(object):
     def __init__(self, transmitter, frequency):
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(self.__class__.__name__)
         # Controls shared object
         self.controls = Controls()
         # Commands uplink queue

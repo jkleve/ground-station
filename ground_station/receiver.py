@@ -9,7 +9,7 @@ class Receiver(object):
         self._connection = connection
         self._stop = stop
 
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(self.__class__.__name__)
 
     @property
     def connection(self):

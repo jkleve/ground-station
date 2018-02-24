@@ -6,7 +6,7 @@ import time
 class Transmitter(object):
     def __init__(self, connection):
         # Initialize logger
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(self.__class__.__name__)
 
         # Save connection
         self.connection = connection

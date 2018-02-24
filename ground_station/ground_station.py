@@ -98,10 +98,11 @@ def connect():
                                            stopbits=serial.STOPBITS_ONE,
                                            timeout=2)  # This timeout is for if the port actually exists
             except Exception as e:
-                # Check if the exception was due to sudo permissions
-                if e.errno == EPERM or e.errno == EACCES:
-                    logging.error("Need sudo permissions")
-                    sys.exit(1)
+                errno = e.errno if hasattr(e, 'errno') else None
+                # Check if the exception was due to permissions
+                if errno == EPERM or errno == EACCES:
+                    logging.error("Permissions denied to create serial connection")
+                    sys.exit(EPERM)
             else:
                 logging.info("Connected on {}".format(port))
                 break

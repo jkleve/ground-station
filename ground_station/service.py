@@ -19,7 +19,7 @@ class Service(object):
         :param float frequency: frequency to run service at when it's running
         :param int priority: a higher lower number represents a higher priority
         """
-        self.log = getLogger(str(name) + str(self.__class__))
+        self.log = getLogger(str(name) + self.__class__.__name__)
 
         self.name = name
         self.events = events
@@ -58,7 +58,7 @@ class ServiceManager(object):
 
         :param list services: list of Service objects
         """
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(self.__class__.__name__)
 
         self._scheduler = scheduler(time, sleep)
         self._services = dict()

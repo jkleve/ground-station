@@ -10,7 +10,7 @@ class UserInput(object):
     def __init__(self, controls_obj, command_event_q):
         from queue import Queue
 
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(self.__class__.__name__)
         self._input = None
         self._event_queue = Queue()
 
