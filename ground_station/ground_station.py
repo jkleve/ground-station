@@ -125,7 +125,7 @@ def connect():
     return MockConnection()
 
 
-def new_main():
+def main():
     parser = ArgumentParser(description="Ground station for quadcopter flight code")
     parser.add_argument('-ms', action='store_true', help="Print time with milli-seconds")
     parser.add_argument('-t', '--controls-transmit-frequency', type=int, default=5,
@@ -201,97 +201,7 @@ def new_main():
     commanding.join()
 
 
-def main():
-    from mission.packet_handlers import dispatch_packet
-    from mission.packet import packet
-    dispatch_packet(packet([0, 0, 0x00, 1, 2, 3, 0]))
-    sys.exit()
-
-    parser = ArgumentParser(description="Ground station for quadcopter flight code")
-    parser.add_argument('-ms', action='store_true', help="Print time with milli-seconds")
-    parser.add_argument('-t', '--controls-transmit-frequency', type=int, default=5,
-                        help="User input uplink frequency (Hz)")
-
-    args = parser.parse_args()
-
-    user_transmit_frequency = args.controls_transmit_frequency
-
-    # Connection to hardware
-    connection = connect()
-    connection.timeout = 0.1
-
-    logs = ({
-                'log_name': 'Receiver',
-                'log_filename': 'logs/receiver_log.log',
-                'log_stream': sys.stdout,
-                'log_ms': args.ms,
-                'stream_level': WARNING,
-                'file_level': DEBUG,
-            },
-            {
-                'log_name': 'PacketHandler',
-                'log_filename': 'logs/packet_log.log',
-                'log_stream': sys.stdout,
-                'log_ms': args.ms,
-            },
-            {
-                'log_name': 'Transmitter',
-                'log_filename': 'logs/transmitter_log.log',
-                'log_ms': args.ms,
-            },
-            {
-                'log_name': 'UplinkControls',
-                'log_filename': 'logs/uplink_controls_log.log',
-                'file_level': INFO,
-                'log_ms': args.ms,
-            })
-
-    receiver_log, \
-    packet_log, \
-    transmitter_log, \
-    uplink_controls_log \
-        = [config_log(**log) for log in logs]
-
-    # Receiver (downlink)
-    packet_handler_obj = PacketHandler(logger=packet_log)
-
-    receiver = Receiver(connection=connection, stop_flag=stop_flag_process,
-                        packet_handler=packet_handler_obj.handle_packet,
-                        compute_checksum=get_checksum)
-    receiver_process = Process(target=receiver.run)
-    receiver_process.start()
-
-    # User input
-
-    # Transmitter
-    transmitter = Transmitter(connection)
-
-    # TODO Send commands, listen, command to flight, then continue to controls_uplink_process
-
-    # Commanding (uplink) runs at a certain frequency
-    controls_uplink = UplinkControls(transmitter=transmitter, frequency=user_transmit_frequency,
-                                     stop_flag=stop_flag_process, logger=uplink_controls_log)
-    controls_uplink_process = Process(target=controls_uplink.run)
-    controls_uplink_process.start()
-
-    # TODO add more logic on the ground station side to automate the initialization and maybe have a menu on config vs start flight
-    # TODO start this when we are going into flight mode
-
-    receiver_process.join()
-    user_input_process.join()
-    controls_uplink_process.join()
-
-
 if __name__ == '__main__':
-    new_main()
-
-    sys.exit()
-
-    # Run main function until we exit or catch an exception
-    try:
-        main()
-    except (KeyboardInterrupt, SystemExit):
-        logging.info('Caught SIGINT. Exiting ground_station')
-        sys.exit(0)
+    main()
 
     sys.exit(0)
