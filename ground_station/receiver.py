@@ -4,10 +4,10 @@ import struct
 
 
 class Receiver(object):
-    def __init__(self, connection, stop_flag):
+    def __init__(self, connection, stop):
         """Receiver thread class"""
         self._connection = connection
-        self._stop_flag = stop_flag
+        self._stop = stop
 
         self.log = getLogger(str(self.__class__))
 
@@ -25,7 +25,7 @@ class Receiver(object):
         """
         self.log.info("Receiver running")
 
-        while not self._stop_flag.is_set():
+        while not self._stop():
             byte = self.get_byte()
 
             if byte is None:

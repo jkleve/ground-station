@@ -91,34 +91,62 @@ class MockConnection(object):
     def write(self, data):
         print('MockConnection: {}'.format(data))
 
+    def read(self, num_bytes):
+        time.sleep(1)  # delay to slow the receiver process down
+        return b'b'
+
 
 def connect():
-    return MockConnection
+    return MockConnection()
 
 
 def new_main():
     connection = connect()
     connection.timeout = 0.1
 
-    from multiprocessing import Event, Process, Queue
+    from multiprocessing import Event, Process
+    import signal
 
     # from mission.controls import Controls
     from receiver import Receiver
     from transmit import Transmitter
-    # from .service import Service, ServiceManager
     from mission.commands import Commanding
 
+    # stop event to stop receiver
+    stop_flag = Event()
+
     # receiver
-    receive = Receiver(connection, Event())  # TODO what to do with Event() here? how to cleanly shut everything down
+    receive = Receiver(connection, stop_flag.is_set)
     receiver = Process(target=receive.run)
 
     # transmitter
     transmitter = Transmitter(connection)
 
-    command_handler = Commanding(transmitter, 20)  # command at 20 Hz
+    # user input & commanding
+    commanding = Process(target=Commanding, args=(transmitter, 20))  # command at 20 Hz
+
+    # signal_handler to gracefully exit
+    def signal_handler(sig_num, frame):
+        stop_flag.set()
+
+        try:
+            commanding.terminate()  # commanding process should receive sigint too
+            commanding.join(10)
+        except AttributeError:
+            pass  # ignore this. commanding exited on its own
+
+        sys.exit(0)
+
+    # register SIGINT
+    signal.signal(signal.SIGINT, signal_handler)
 
     # start receiver
     receiver.start()
+    # start user input & command handling
+    commanding.start()
+
+    commanding.terminate()
+    commanding.join()
 
 
 def main():

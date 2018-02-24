@@ -19,7 +19,7 @@ class Service(object):
         :param float frequency: frequency to run service at when it's running
         :param int priority: a higher lower number represents a higher priority
         """
-        self.log = getLogger(str(self.__class__))
+        self.log = getLogger(str(name) + str(self.__class__))
 
         self.name = name
         self.events = events
@@ -33,6 +33,7 @@ class Service(object):
         except Empty:
             pass
         else:
+            self.log.debug('Emitting event {}'.format(event))
             self._action(event)
 
 
@@ -91,6 +92,7 @@ class ServiceManager(object):
         """
         if name in self._services and not self._services[name].running:
             service = self._services[name].service
+            self.log.info('Starting service {}'.format(name))
             self._periodic(name, service.step)
             service.running = True
 

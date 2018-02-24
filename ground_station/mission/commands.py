@@ -27,8 +27,8 @@ class Commanding(object):
         self.user_input.non_flight()
 
         def signal_handler(sig_num, frame):
-            self.log.info('Shutting down {}'.format(str(self.__class__)))
-            self.user_input.stop(True)
+            self.log.info('Shutting down')
+            self.user_input.stop()
             sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
