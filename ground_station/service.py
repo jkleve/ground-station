@@ -10,19 +10,21 @@ class Service(object):
 
     Holds data about a service
     """
-    def __init__(self, name, action, events, frequency):
+    def __init__(self, name, action, events, frequency, priority=1):
         """Service
 
         :param str name: name of service to keep track of it. Use this when starting and stopping services
         :param callable action: action to call at frequency
-        :param queue events: queue type object that implements a get(block=) method
+        :param events: queue type object that implements a get(block=) method
         :param float frequency: frequency to run service at when it's running
+        :param int priority: a higher lower number represents a higher priority
         """
         self.log = getLogger(str(self.__class__))
 
         self.name = name
         self.events = events
         self.interval = 1/frequency
+        self.priority = priority
         self._action = action
 
     def step(self):
@@ -74,7 +76,7 @@ class ServiceManager(object):
         """
         service = self._services[name].service
         self._services[name].scheduler_event = \
-            self._scheduler.enter(service.interval, 1, self._periodic, (name, service.step, args))
+            self._scheduler.enter(service.interval, service.priority, self._periodic, (name, service.step, args))
         action(*args)
 
     def start_all(self):
