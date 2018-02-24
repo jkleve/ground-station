@@ -84,38 +84,38 @@ def connect():
     return connection
 
 
+class MockConnection(object):
+    def __init__(self):
+        pass
+
+    def write(self, data):
+        print('MockConnection: {}'.format(data))
+
+
+def connect():
+    return MockConnection
+
+
 def new_main():
     connection = connect()
     connection.timeout = 0.1
 
     from multiprocessing import Event, Process, Queue
 
-    from mission.controls import Controls
-    from .receiver import Receiver
-    from .transmit import Transmitter
-    from .service import Service, ServiceManager
-
-    stop_flag = Event()
+    # from mission.controls import Controls
+    from receiver import Receiver
+    from transmit import Transmitter
+    # from .service import Service, ServiceManager
+    from mission.commands import Commanding
 
     # receiver
-    receive = Receiver(connection, stop_flag)
+    receive = Receiver(connection, Event())  # TODO what to do with Event() here? how to cleanly shut everything down
     receiver = Process(target=receive.run)
 
     # transmitter
     transmitter = Transmitter(connection)
 
-    # Controls shared object
-    controls = Controls()
-    # Commands uplink queue
-    commands = Queue()
-    uplink_frequency = 20
-
-    # Uplink services
-    uplink_services = ServiceManager([
-        Service('Controls', transmitter.send, controls, uplink_frequency),
-        Service('Commands', transmitter.send, commands, uplink_frequency),
-    ])
-    uplink_services.start('Commands')
+    command_handler = Commanding(transmitter, 20)  # command at 20 Hz
 
     # start receiver
     receiver.start()
@@ -203,6 +203,10 @@ def main():
 
 
 if __name__ == '__main__':
+    new_main()
+
+    sys.exit()
+
     # Run main function until we exit or catch an exception
     try:
         main()
