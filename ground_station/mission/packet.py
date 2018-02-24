@@ -13,12 +13,12 @@ MAX_PACKET_SIZE = 99
 MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - 1 - 1 - 1  # minus 1 for header, op_code, & data_size
 
 
-def generate_packet(op_code, data):
+def generate_packet(op_code, data=None):
     """Take an opcode and data and return an array of bytes to be uplinked
     """
     # TODO could I handle data types here? iterating through data? maybe need to check
     # against the op_code though otherwise the fsw will get it wrong
-    pass
+    return ['t', 'e', 's', 't']
 
 
 def packet(data):
