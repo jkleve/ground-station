@@ -35,8 +35,8 @@ TWI_MESSAGES = dict([
 ])
 
 
-def log_packet(self, packet, message, level=INFO):
-    self.log.log(level, '({:16}): {}'.format(opcode_to_str[packet.op_code], message))
+def log_packet(packet, message, level=INFO):
+    log.log(level, '({:16}): {}'.format(opcode_to_str[packet.op_code], message))
 
 
 def handle_string(packet):
