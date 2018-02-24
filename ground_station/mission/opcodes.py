@@ -24,7 +24,7 @@ opcode_to_str = {
     0x21: 'change_pid_gain',
     0x22: 'downlink_yawpitchroll',
     0x23: 'flight_mode',
-    0x24: UNUSED,
+    0x24: 'non_flight_mode',
     0x25: 'terminate',
 
 
@@ -52,4 +52,11 @@ def get_opcode(op_code):
 
     return 'invalid'  # User gave bad input
 
+
+def is_command(op_code):
+    return opcode_to_hex['controls'] < op_code <= opcode_to_hex['terminate']
+
+
+def is_controls(op_code):
+    return op_code == opcode_to_hex['controls']
 

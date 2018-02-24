@@ -74,6 +74,9 @@ flight_controls = {
         '\\': {
             'key_down': (ControlEvent.THROTTLE, 0),
         },
+        'f': {
+            'key_down': (CommandEvent.EXIT_FLIGHT_MODE, ),
+        },
     },
     'joystick': {
         'axis': {
@@ -83,26 +86,20 @@ flight_controls = {
             5: (ControlEvent.THROTTLE, convert_to_flight_units),
         },
         'buttons': {
-            1: {
-                'key_down': (CommandEvent.TEST, 1),
-            }
         },
     },
 }
 
 non_flight_controls = {
-    'keyboard': {},
+    'keyboard': {
+        'f': {
+            'key_down': (CommandEvent.ENTER_FLIGHT_MODE, ),
+        },
+    },
     'joystick': {
         'axis': {
-            0: (ControlEvent.ROLL, convert_to_flight_units),
-            1: (ControlEvent.PITCH, convert_to_flight_units),  # this takes a callback
-            3: (ControlEvent.YAW, convert_to_flight_units),
-            5: (ControlEvent.THROTTLE, convert_to_flight_units),
         },
         'buttons': {
-            1: {
-                'key_down': (CommandEvent.TEST, 1),
-            }
         },
     },
 }

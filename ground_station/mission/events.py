@@ -12,5 +12,6 @@ class ControlEvent(Enum):
 
 
 class CommandEvent(Enum):
-    Test = 1
+    ENTER_FLIGHT_MODE = 0
+    EXIT_FLIGHT_MODE = 1
 
