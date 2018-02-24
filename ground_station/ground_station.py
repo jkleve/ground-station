@@ -2,54 +2,79 @@ from argparse import ArgumentParser
 from errno import EACCES, EPERM
 import logging
 from logging import DEBUG, INFO, WARNING, ERROR
-import multiprocessing
-from multiprocessing import Process
+from multiprocessing import Event, Process
+from pathlib import Path
 import serial
 import signal
 import sys
 import time
 
-#from .transmit import Transmitter
+from receiver import Receiver
+from transmit import Transmitter
+
+from mission.commands import Commanding
 
 
-def config_log(log_name, log_filename=None, log_stream=None, log_ms=False,
-            stream_level=logging.INFO, file_level=logging.DEBUG):
-    # Logger
+def config_log(log_name, log_filename=None, file_fmt='%(asctime)8s %(levelname)7s: %(message)s',
+               file_datefmt='%H:%M:%S', file_level=logging.DEBUG, log_stream=None,
+               stream_fmt='%(asctime)8s %(levelname)7s: %(message)s', stream_datefmt='%H:%M:%S',
+               stream_level=logging.INFO):
+
+    # Get log and set level to lowest level
     log = logging.getLogger(log_name)
     log.setLevel(logging.DEBUG)
-    log.propagate = False  # TODO this is to stop double logging. It seems there is a default handler going to stdout
 
-    # File handler
+    # Create file handler & add it to log
     if log_filename:
-        if log_ms:
-            file_format = logging.Formatter(fmt='%(asctime)8s.%(msecs).3d %(levelname)7s: %(message)s',
-                                            datefmt='%m/%d %H:%M:%S')
-        else:
-            file_format = logging.Formatter(fmt='%(asctime)8s%(name)16s: %(levelname)7s: %(message)s',
-                                            datefmt='%m/%d %H:%M:%S')
+        if not Path(log_filename).parent.exists():
+            Path(log_filename).parent.mkdir()
+
+        file_format = logging.Formatter(fmt=file_fmt, datefmt=file_datefmt)
         file_log_handler = logging.FileHandler(log_filename)
+
         file_log_handler.setFormatter(file_format)
         file_log_handler.setLevel(file_level)
         # Add handle to the log
         log.addHandler(file_log_handler)
 
-    # Stream handler
+    # Create stream handler & add it to log
     if log_stream:
-        if log_ms:
-            stream_format = logging.Formatter(fmt='%(asctime)8s.%(msecs)3d %(levelname)7s: %(message)s',
-                                              datefmt='%H:%M:%S')
-            #stream_format = logging.Formatter(fmt='%(asctime)8s%(name)16s: %(levelname)7s: %(message)s',
-            #                                  datefmt='%H:%M:%S')
-        else:
-            stream_format = logging.Formatter(fmt='%(asctime)8s%(name)16s: %(levelname)7s: %(message)s',
-                                              datefmt='%H:%M:%S')
+        stream_format = logging.Formatter(fmt=stream_fmt, datefmt=stream_datefmt)
         stream_log_handler = logging.StreamHandler(stream=log_stream)
+
         stream_log_handler.setFormatter(stream_format)
         stream_log_handler.setLevel(stream_level)
         # Add handle to the log
         log.addHandler(stream_log_handler)
 
     return log
+
+
+def config_logs(logs):
+    max_name_length = 0
+    log_ms = False
+
+    for log in logs:
+        name = log['log_name']
+        if len(name) > max_name_length:
+            max_name_length = len(name)
+
+        if log['log_ms']:
+            log_ms = True
+
+        ms = '.%(msecs)3d' if log_ms else ''
+
+        file_fmt = '%(asctime)8s{ms} %(name){name_length}s: %(levelname)7s: %(message)s'.format(ms=ms,
+                                                                                                name_length=
+                                                                                                max_name_length)
+
+        stream_fmt = '%(asctime)8s{ms}: %(levelname)7s: %(message)s'.format(ms=ms,
+                                                                            name_length=max_name_length)
+        datefmt = '%H:%M:%S'
+
+        log.pop('log_ms', None)  # remove log_ms from log dict because config_log doesn't take a log_ms kwarg
+
+        config_log(**log, file_fmt=file_fmt, file_datefmt=datefmt, stream_fmt=stream_fmt, stream_datefmt=datefmt)
 
 
 def connect():
@@ -101,16 +126,43 @@ def connect():
 
 
 def new_main():
+    parser = ArgumentParser(description="Ground station for quadcopter flight code")
+    parser.add_argument('-ms', action='store_true', help="Print time with milli-seconds")
+    parser.add_argument('-t', '--controls-transmit-frequency', type=int, default=5,
+                        help="User input uplink frequency (Hz)")
+
+    args = parser.parse_args()
+
+    logs = ({
+                'log_name': 'Receiver',
+                'log_filename': 'logs/receiver_log.log',
+                'log_stream': sys.stdout,
+                'log_ms': args.ms,
+                'stream_level': WARNING,
+                'file_level': DEBUG,
+            },
+            {
+                'log_name': 'PacketHandler',
+                'log_filename': 'logs/packet_log.log',
+                'log_stream': sys.stdout,
+                'log_ms': args.ms,
+            },
+            {
+                'log_name': 'Transmitter',
+                'log_filename': 'logs/transmitter_log.log',
+                'log_ms': args.ms,
+            },
+            {
+                'log_name': 'UplinkControls',
+                'log_filename': 'logs/uplink_controls_log.log',
+                'file_level': INFO,
+                'log_ms': args.ms,
+            })
+
+    config_logs(logs)
+
     connection = connect()
     connection.timeout = 0.1
-
-    from multiprocessing import Event, Process
-    import signal
-
-    # from mission.controls import Controls
-    from receiver import Receiver
-    from transmit import Transmitter
-    from mission.commands import Commanding
 
     # stop event to stop receiver
     stop_flag = Event()
