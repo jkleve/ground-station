@@ -1,5 +1,5 @@
 from logging import getLogger
-from .mission import *
+from mission import *
 import struct
 
 
@@ -35,7 +35,7 @@ class Receiver(object):
 
                 # discard packets that are too big
                 if size > MAX_PACKET_DATA_SIZE:
-                    self.log.warning('Packet \'size\' field indicates MAX_PACKET_DATA_SIZE exceeded ({} > {}'
+                    self.log.warning('Packet \'size\' field indicates MAX_PACKET_DATA_SIZE exceeded ({} > {})'
                                      .format(size, MAX_PACKET_DATA_SIZE))
                     continue
 
