@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 Packet = namedtuple('Packet', ['header', 'op_code', 'data_size', 'data', 'checksum', 'raw'])
 
 PACKET_HEADER = 0x42
-MAX_PACKET_SIZE = 99
+MAX_PACKET_SIZE = 64
 MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - 1 - 1 - 1  # minus 1 for header, op_code, & data_size
 
 

@@ -109,20 +109,20 @@ def connect():
     return connection
 
 
-class MockConnection(object):
-    def __init__(self):
-        pass
+# class MockConnection(object):
+#     def __init__(self):
+#         pass
+#
+#     def write(self, data):
+#         print('MockConnection: {}'.format(data))
+#
+#     def read(self, num_bytes):
+#         time.sleep(1)  # delay to slow the receiver process down
+#         return b'b'
 
-    def write(self, data):
-        print('MockConnection: {}'.format(data))
 
-    def read(self, num_bytes):
-        time.sleep(1)  # delay to slow the receiver process down
-        return b'b'
-
-
-def connect():
-    return MockConnection()
+# def connect():
+#     return MockConnection()
 
 
 def main():
