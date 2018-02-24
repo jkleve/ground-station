@@ -4,5 +4,5 @@ iso8601==0.1.12
 PyYAML==3.12
 serial==0.0.38
 
-/home/jesse/code/pygame_controller
+-e git+git@github.com:jkleve/map_input.git@fixes-0.2#egg=map_input
 
