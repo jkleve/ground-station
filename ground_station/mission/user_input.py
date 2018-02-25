@@ -1,7 +1,7 @@
 from logging import getLogger
 from map_input import InputThread, un_intialize
 from .events import ControlEvent, CommandEvent, EVENT_TYPE, EVENT_VALUE
-from .opcodes import opcode_to_hex, is_command, is_controls
+from .opcodes import opcode_to_hex
 from .packet import generate_packet
 from .user_mappings import flight_controls, non_flight_controls
 

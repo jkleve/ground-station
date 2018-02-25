@@ -78,6 +78,7 @@ class ServiceManager(object):
         service = self._services[name].service
         self._services[name].scheduler_event = \
             self._scheduler.enter(service.interval, service.priority, self._periodic, (name, service.step, args))
+        self.log.debug('Running service step {}'.format(name))
         action(*args)
 
     def start_all(self):

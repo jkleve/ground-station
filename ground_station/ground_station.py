@@ -168,11 +168,24 @@ def main():
                 'file_level': DEBUG,
                 'stream_level': DEBUG,
                 'log_ms': args.ms,
+            },
+            {
+                'log_name': 'UserInput',
+                'log_filename': 'logs/user_input.log',
+                'file_level': DEBUG,
+                'stream_level': DEBUG,
+                'log_ms': args.ms,
+            },
+            {
+                'log_name': 'ServiceManager',
+                'log_filename': 'logs/services.log',
+                'log_stream': sys.stdout,
+                'file_level': DEBUG,
+                'stream_level': INFO,
+                'log_ms': args.ms,
             })
 
     # other logs:
-    # UserInput
-    # ServiceManager
     # CommandService
     # ControlsService
 
