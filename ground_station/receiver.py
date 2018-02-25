@@ -23,7 +23,7 @@ class Receiver(object):
         [HEADER] [OP-CODE] [DATA SIZE] [DATA] ... [CHECKSUM]
 
         """
-        self.log.info("Receiver running")
+        self.log.info("Starting")
 
         while not self._stop():
             byte = self.get_byte()
@@ -45,6 +45,7 @@ class Receiver(object):
                     data.append(self.get_byte())
 
                 p = packet([byte, size] + data)
+                self.log.debug('Received packet {}'.format(p))
                 handle_packet(p)
 
             else:  # byte != self.header
@@ -70,7 +71,6 @@ class Receiver(object):
 
         if len(b) > 0:
             b = struct.unpack('B', b)[0]
-            # print("received {}".format(b))
             return b
 
 

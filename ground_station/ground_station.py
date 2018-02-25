@@ -22,6 +22,7 @@ def config_log(log_name, log_filename=None, file_fmt='%(asctime)8s %(levelname)7
 
     # Get log and set level to lowest level
     log = logging.getLogger(log_name)
+    log.propagate = False  # don't propagate to root logger. not sure this is what we want but stops duplicate prints
     log.setLevel(logging.DEBUG)
 
     # Create file handler & add it to log
@@ -68,7 +69,7 @@ def config_logs(logs):
                                                                                                 name_length=
                                                                                                 max_name_length)
 
-        stream_fmt = '%(asctime)8s{ms}: %(levelname)7s: %(message)s'.format(ms=ms,
+        stream_fmt = '%(asctime)8s{ms}: %(name){name_length}s %(levelname)7s: %(message)s'.format(ms=ms,
                                                                             name_length=max_name_length)
         datefmt = '%H:%M:%S'
 
@@ -136,29 +137,44 @@ def main():
 
     logs = ({
                 'log_name': 'Receiver',
-                'log_filename': 'logs/receiver_log.log',
-                'log_stream': sys.stdout,
+                'log_filename': 'logs/receiver.log',
+                # 'log_stream': sys.stdout,
                 'log_ms': args.ms,
-                'stream_level': WARNING,
+                'stream_level': DEBUG,
                 'file_level': DEBUG,
             },
             {
-                'log_name': 'PacketHandler',
-                'log_filename': 'logs/packet_log.log',
+                'log_name': 'mission.packet_handlers',
+                'log_filename': 'logs/packet_handler.log',
                 'log_stream': sys.stdout,
+                'stream_level': INFO,
+                'log_ms': args.ms,
+            },
+            {
+                'log_name': 'mission.packet',
+                'log_filename': 'logs/packet.log',
+                'log_stream': sys.stdout,
+                'stream_level': INFO,
                 'log_ms': args.ms,
             },
             {
                 'log_name': 'Transmitter',
-                'log_filename': 'logs/transmitter_log.log',
+                'log_filename': 'logs/transmitter.log',
                 'log_ms': args.ms,
             },
             {
-                'log_name': 'UplinkControls',
-                'log_filename': 'logs/uplink_controls_log.log',
-                'file_level': INFO,
+                'log_name': 'Commanding',
+                'log_filename': 'logs/commanding.log',
+                'file_level': DEBUG,
+                'stream_level': DEBUG,
                 'log_ms': args.ms,
             })
+
+    # other logs:
+    # UserInput
+    # ServiceManager
+    # CommandService
+    # ControlsService
 
     config_logs(logs)
 
@@ -197,6 +213,9 @@ def main():
     receiver.start()
     # start user input & command handling
     commanding.start()
+
+    while True:
+        pass
 
     commanding.terminate()
     commanding.join()

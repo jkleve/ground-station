@@ -1,5 +1,5 @@
 from logging import getLogger
-from multiprocessing import Event, Process, Queue
+from multiprocessing import Queue
 import signal
 import sys
 

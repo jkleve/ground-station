@@ -66,7 +66,7 @@ class UserInput(object):
     def run(self):
         while True:
             event = self._event_queue.get()
-            print(event)
+            self.log.debug('Event: {}'.format(event))
 
             if isinstance(event[EVENT_TYPE], ControlEvent):
                 self.control_event(event)

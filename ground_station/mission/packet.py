@@ -42,5 +42,6 @@ def handle_packet(packet):
     if packet.checksum != computed_checksum:
         log.warning('Bad checksum {} {}'.format(computed_checksum, packet))
 
+    log.debug('Dispatching packet {}'.format(packet))
     dispatch_packet(packet)
 
