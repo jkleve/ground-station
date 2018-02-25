@@ -200,7 +200,9 @@ def main():
 
         try:
             commanding.terminate()  # commanding process should receive sigint too
+            receiver.terminate()
             commanding.join(10)
+            receiver.join(10)
         except AttributeError:
             pass  # ignore this. commanding exited on its own
 
@@ -216,9 +218,6 @@ def main():
 
     while True:
         pass
-
-    commanding.terminate()
-    commanding.join()
 
 
 if __name__ == '__main__':
