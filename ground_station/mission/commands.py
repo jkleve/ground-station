@@ -6,13 +6,16 @@ from threading import Thread
 
 from mission.controls import Controls
 from mission.events import CommandEvent
+from mission.opcodes import opcode_to_hex
+from mission.packet import generate_packet
 from mission.user_input import UserInput
 from service import Service, ServiceManager
 
 
 class Commanding(object):
-    def __init__(self, transmitter, frequency):
+    def __init__(self, send_handler, frequency):
         self.log = getLogger(self.__class__.__name__)
+        self.send = send_handler
         # Controls shared object
         self.controls = Controls()
         # Commands uplink queue
@@ -20,7 +23,7 @@ class Commanding(object):
 
         # Uplink services
         self.uplink_services = ServiceManager([
-            Service('Controls', transmitter.send, self.controls, frequency, 1),
+            Service('Controls', self.send, self.controls, frequency, 1),
             Service('Commands', self.command_handler, self.commands, frequency, 2),
         ])
 
@@ -43,8 +46,10 @@ class Commanding(object):
 
     def command_handler(self, command):
         if command == CommandEvent.ENTER_FLIGHT_MODE:
+            self.send(generate_packet(opcode_to_hex['flight_mode']))
             self.enter_flight_mode()
         if command == CommandEvent.EXIT_FLIGHT_MODE:
+            self.send(generate_packet(opcode_to_hex['non_flight_mode']))
             self.exit_flight_mode()
 
     def enter_flight_mode(self):

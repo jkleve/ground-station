@@ -160,6 +160,7 @@ def main():
             {
                 'log_name': 'Transmitter',
                 'log_filename': 'logs/transmitter.log',
+                'file_level': DEBUG,
                 'log_ms': args.ms,
             },
             {
@@ -173,7 +174,16 @@ def main():
                 'log_name': 'UserInput',
                 'log_filename': 'logs/user_input.log',
                 'file_level': DEBUG,
-                'stream_level': DEBUG,
+                # 'log_stream': sys.stdout,
+                # 'stream_level': DEBUG,
+                'log_ms': args.ms,
+            },
+            {
+                'log_name': 'map_input',
+                'log_filename': 'logs/user_input.log',
+                'file_level': DEBUG,
+                # 'log_stream': sys.stdout,
+                # 'stream_level': DEBUG,
                 'log_ms': args.ms,
             },
             {
@@ -205,7 +215,7 @@ def main():
     transmitter = Transmitter(connection)
 
     # user input & commanding
-    commanding = Process(target=Commanding, args=(transmitter, 20))  # command at 20 Hz
+    commanding = Process(target=Commanding, args=(transmitter.send, 20))  # command at 20 Hz
 
     # signal_handler to gracefully exit
     def signal_handler(sig_num, frame):
