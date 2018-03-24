@@ -1,11 +1,11 @@
 from logging import getLogger
-from multiprocessing import Queue
+from queue import Queue
 import signal
 import sys
 from threading import Thread
 
 from mission.controls import Controls
-from mission.events import CommandEvent
+from mission.events import CommandEvent, EVENT_TYPE
 from mission.opcodes import opcode_to_hex
 from mission.packet import generate_packet
 from mission.user_input import UserInput
@@ -21,7 +21,7 @@ class Commanding(object):
         # Commands uplink queue
         self.commands = Queue()
 
-        # Uplink services
+        # Uplink services uplink generated packets at certain frequency
         self.uplink_services = ServiceManager([
             Service('Controls', self.send, self.controls, frequency, 1),
             Service('Commands', self.command_handler, self.commands, frequency, 2),
@@ -32,38 +32,34 @@ class Commanding(object):
 
         def signal_handler(sig_num, frame):
             self.log.info('Shutting down')
-            self.user_input.stop()
+            self.uplink_services.stop('Controls')
+            self.uplink_services.stop('Commands')
+            self.user_input.stop(True)
             sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
 
-        self.command_thread = Thread(target=self.uplink_services.start, args=('Commands',))
-        self.command_thread.start()
         self.controls_thread = None
-        # self.uplink_services.start('Commands')
+        self.uplink_services.start('Commands')
 
         self.user_input.run()
 
-    def command_handler(self, command):
-        if command == CommandEvent.ENTER_FLIGHT_MODE:
-            self.send(generate_packet(opcode_to_hex['flight_mode']))
+    def command_handler(self, event):
+        if event[EVENT_TYPE] == CommandEvent.ENTER_FLIGHT_MODE:
             self.enter_flight_mode()
-        if command == CommandEvent.EXIT_FLIGHT_MODE:
-            self.send(generate_packet(opcode_to_hex['non_flight_mode']))
+            self.commands.put(generate_packet(opcode_to_hex['flight_mode']))
+        if event[EVENT_TYPE] == CommandEvent.EXIT_FLIGHT_MODE:
             self.exit_flight_mode()
+            self.commands.put(generate_packet(opcode_to_hex['non_flight_mode']))
 
     def enter_flight_mode(self):
         self.log.info('Entering flight mode')
-        self.user_input.flight()
 
-        self.controls_thread = Thread(target=self.uplink_services.start, args=('Controls',))
-        # self.uplink_services.start('Controls')
+        self.user_input.flight()
+        self.uplink_services.start('Controls')
 
     def exit_flight_mode(self):
         self.log.info('Exiting flight mode')
-        # self.uplink_services.stop('Controls')
-        self.controls_thread.terminate()
-        self.controls_thread.join(1)
-        self.controls_thread = None
 
+        self.uplink_services.stop('Controls')
         self.user_input.non_flight()

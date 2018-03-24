@@ -1,40 +1,42 @@
 from logging import getLogger
-from map_input import InputThread, un_intialize
+from map_input import Input, un_intialize, initialize
 from .events import ControlEvent, CommandEvent, EVENT_TYPE, EVENT_VALUE
-from .opcodes import opcode_to_hex
-from .packet import generate_packet
 from .user_mappings import flight_controls, non_flight_controls
 
 
 class UserInput(object):
     def __init__(self, controls_obj, command_event_q):
         from queue import Queue
+        from threading import Thread, Event
 
         self.log = getLogger(self.__class__.__name__)
-        self._input = None
+
+        initialize(joystick=True)  # initialize map_input
+
+        self.stop_flag = Event()
         self._event_queue = Queue()
+
+        self._input = Input(self._event_queue, self.stop_flag.is_set, non_flight_controls)
+
+        self._input_thread = Thread(target=self._input.run)
+        self._input_thread.start()
 
         self._controls = controls_obj
         self._commands = command_event_q
 
     def flight(self):
-        self.stop()
-
-        self._input = InputThread(self._event_queue, flight_controls)
-        self._input.start()
+        self._input.mapping = flight_controls
 
     def non_flight(self):
-        self.stop()
-
-        self._input = InputThread(self._event_queue, non_flight_controls)
-        self._input.start()
+        self._input.mapping = non_flight_controls
 
     def stop(self, kill_all=False):
         if kill_all:
             un_intialize()
 
         if self._input is not None:
-            self._input.stop()
+            self.stop_flag.set()
+            self._input_thread.join()
 
     def control_event(self, event):
         if event[EVENT_TYPE] == ControlEvent.YAW:
@@ -47,21 +49,7 @@ class UserInput(object):
             self._controls.throttle = event[EVENT_VALUE]
 
     def command_event(self, event):
-        p = None
-
-        if event[EVENT_TYPE] == CommandEvent.ENTER_FLIGHT_MODE:
-            self.flight()
-            p = generate_packet(opcode_to_hex['flight_mode'])
-        elif event[EVENT_TYPE] == CommandEvent.EXIT_FLIGHT_MODE:
-            self.non_flight()
-            p = generate_packet(opcode_to_hex['non_flight_mode'])
-
-        if p is None:  # should never happen as long as run() is handling this error
-            self.log.warning('user_input.command_event was called with an invalid event type!')
-            return
-
-        self.log.info(p)
-        self._commands.put(p)
+        self._commands.put(event)  # forward event to command_handler via Command service
 
     def run(self):
         while True:

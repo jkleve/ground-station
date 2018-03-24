@@ -3,6 +3,7 @@ from logging import getLogger
 from queue import Empty
 from sched import scheduler
 from time import sleep, time
+from threading import Event, Thread
 
 
 class Service(object):
@@ -48,6 +49,8 @@ class SchedulerService(object):
         """
         self.service = service
         self.running = running
+        self.thread = None
+        self.stop_flag = None
         self.scheduler_event = scheduler_event
 
 
@@ -66,7 +69,7 @@ class ServiceManager(object):
         for service in services:
             self._services[service.name] = SchedulerService(service, False, None)
 
-        self._scheduler.run()
+        # self._scheduler.run()
 
     def _periodic(self, name, action, args=()):
         """Start a periodic event
@@ -75,10 +78,18 @@ class ServiceManager(object):
         :param callable action: action to call at service frequency
         :param args: arguments to pass to action
         """
+        if self._services[name].stop_flag.is_set():
+            self.log.debug('Service {name} done'.format(**locals()))
+            self._services[name].running = False
+            self._services[name].thread = None
+            self._services[name].stop_flag = None
+            self._services[name].scheduler_event = None
+            return
+
         service = self._services[name].service
         self._services[name].scheduler_event = \
             self._scheduler.enter(service.interval, service.priority, self._periodic, (name, service.step, args))
-        self.log.debug('Running service step {}'.format(name))
+        self.log.debug('Running service step {name}'.format(**locals()))
         action(*args)
 
     def start_all(self):
@@ -91,27 +102,50 @@ class ServiceManager(object):
 
         :param str name: name of service to start
         """
-        if name in self._services and not self._services[name].running:
-            service = self._services[name].service
-            self.log.info('Starting service {}'.format(name))
-            self._periodic(name, service.step)
-            service.running = True
+        if name not in self._services:
+            self.log.warning('Service {name} does not exist'.format(**locals()))
+            return
 
-        self._scheduler.run()
+        scheduler_service = self._services[name]
+        service = scheduler_service.service
+
+        if not scheduler_service.running:
+            self.log.info('Starting service {name}'.format(**locals()))
+
+            scheduler_service.stop_flag = Event()
+            self._periodic(name, service.step)
+            scheduler_service.thread = Thread(target=self._scheduler.run)
+            # scheduler_service.thread = Thread(target=self._periodic, args=(name, service.step))
+            scheduler_service.thread.start()
+
+            scheduler_service.running = True
+
+            # self._scheduler.run()
+        else:
+            self.log.debug('Service {name} is already running'.format(**locals()))
 
     def stop(self, name):
         """Stop service
 
         :param str name: name of service to stop
         """
+        if name not in self._services:
+            self.log.warning('Service {name} does not exist'.format(**locals()))
+            return
+
+        scheduler_service = self._services[name]
+
         # if the service exists and is running
-        if name in self._services and self._services[name].running:
-            try:
-                self.log.info('Stopping service {}'.format(name))
-                self._scheduler.cancel(self._services[name].event)
-            except ValueError:
-                self.log.warning('Service {} does not have an event scheduled'.format(name))
-            self._services[name].running = False
+        if self._services[name].running:
+            self.log.info('Stopping service {name}'.format(**locals()))
+            scheduler_service.stop_flag.set()
+
+            # scheduler_service.thread.join()
+
+            # scheduler_service.thread = None
+
+        else:
+            self.log.debug('Service {name} is not running'.format(**locals()))
 
 
 def test():
@@ -134,6 +168,11 @@ def test():
     s1 = Service('Uplink', MockConn().send, t1, 20)
     ush = ServiceManager([s1, ])
     ush.start('Uplink')
+    print('here')
+
+    sleep(5)
+    ush.stop('Uplink')
+    print('done')
 
 
 if __name__ == '__main__':
