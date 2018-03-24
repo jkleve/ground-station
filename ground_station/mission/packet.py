@@ -16,17 +16,21 @@ MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - 1 - 1 - 1  # minus 1 for header, op_cod
 def generate_packet(op_code, data=None):
     """Take an opcode and data and return an array of bytes to be uplinked
     """
+    if data is not None and not isinstance(data, list):
+        log.error('generate_packet called and data is not of type list')
+        return None
+
     # the packet's size byte is 2 plus the number of data bytes (1 for header byte and 1 for opcode byte)
     if data is not None:
         size = 1 + len(data) + 1
-        p = [PACKET_HEADER, size, op_code, data]
+        p = [PACKET_HEADER, size, op_code] + data
     else:
         size = 2
         p = [PACKET_HEADER, size, op_code]
 
-    checksum = get_checksum(p)
+    p.append(get_checksum(p))
 
-    return p.append(checksum)
+    return p
 
 
 def packet(data):
