@@ -33,6 +33,10 @@ class Receiver(object):
             elif byte == PACKET_HEADER:
                 size = self.get_byte()
 
+                if size is None:
+                    self.log.warning('Got \'None\' when trying to get packet size')
+                    continue
+
                 # discard packets that are too big
                 if size > MAX_PACKET_DATA_SIZE:
                     self.log.warning('Packet \'size\' field indicates MAX_PACKET_DATA_SIZE exceeded ({} > {})'
