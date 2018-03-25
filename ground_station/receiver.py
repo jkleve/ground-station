@@ -20,7 +20,7 @@ class Receiver(object):
         This method assumes a specific packet layout with 1 byte fields
 
         Packet layer:
-        [HEADER] [OP-CODE] [DATA SIZE] [DATA] ... [CHECKSUM]
+        [HEADER] [SIZE] [OP-CODE] [DATA] ... [CHECKSUM]
 
         """
         self.log.info("Starting")
