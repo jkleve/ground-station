@@ -48,9 +48,11 @@ class Commanding(object):
         if event[EVENT_TYPE] == CommandEvent.ENTER_FLIGHT_MODE:
             self.enter_flight_mode()
             self.commands.put(generate_packet(opcode_to_hex['flight_mode']))
-        if event[EVENT_TYPE] == CommandEvent.EXIT_FLIGHT_MODE:
+        elif event[EVENT_TYPE] == CommandEvent.EXIT_FLIGHT_MODE:
             self.exit_flight_mode()
             self.commands.put(generate_packet(opcode_to_hex['non_flight_mode']))
+        elif event[EVENT_TYPE] == CommandEvent.TOGGLE_YAWPITCHROLL:
+            self.commands.put(generate_packet(opcode_to_hex['downlink_yawpitchroll']))
 
     def enter_flight_mode(self):
         self.log.info('Entering flight mode')

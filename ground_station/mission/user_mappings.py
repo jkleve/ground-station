@@ -95,6 +95,9 @@ non_flight_controls = {
         'f': {
             'key_down': (CommandEvent.ENTER_FLIGHT_MODE, ),
         },
+        'y': {
+            'key_down': (CommandEvent.TOGGLE_YAWPITCHROLL, ),
+        },
     },
     'joystick': {
         'axis': {
