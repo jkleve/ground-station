@@ -30,9 +30,9 @@ from mission.logs import get_logs
 
 def main():
     parser = ArgumentParser(description="Ground station for quadcopter flight code")
-    parser.add_argument('-ms', action='store_true', help="Print time with milli-seconds")
-    parser.add_argument('-t', '--controls-transmit-frequency', type=int, default=5,
-                        help="User input uplink frequency (Hz)")
+    parser.add_argument('-ms', '--milliseconds', action='store_true', help="Print time with milli-seconds")
+    parser.add_argument('-u', '--uplink-frequency', type=int, default=10,
+                        help="Uplink frequency in Hz (Default = 10 Hz)")
 
     args = parser.parse_args()
 
@@ -52,7 +52,7 @@ def main():
     transmitter = Transmitter(connection)
 
     # user input & commanding
-    commanding = Process(target=Commanding, args=(transmitter.send, 20))  # command at 20 Hz
+    commanding = Process(target=Commanding, args=(transmitter.send, args.uplink_frequency))
 
     # signal_handler to gracefully exit
     def signal_handler(sig_num, frame):
