@@ -20,12 +20,12 @@ def generate_packet(op_code, data=None):
         log.error('generate_packet called and data is not of type list')
         return None
 
-    # the packet's size byte is 2 plus the number of data bytes (1 for header byte and 1 for opcode byte)
+    # the packet's size byte is 1 plus the number of data bytes (1 for opcode byte)
     if data is not None:
-        size = 1 + len(data) + 1
+        size = len(data) + 1
         p = [PACKET_HEADER, size, op_code] + data
     else:
-        size = 2
+        size = 1
         p = [PACKET_HEADER, size, op_code]
 
     p.append(get_checksum(p))

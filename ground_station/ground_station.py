@@ -36,7 +36,7 @@ def main():
 
     args = parser.parse_args()
 
-    config_logs(get_logs(args.ms))
+    config_logs(get_logs(args.milliseconds))
 
     connection = connect()
     connection.timeout = 0.1
