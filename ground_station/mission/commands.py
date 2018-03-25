@@ -2,7 +2,6 @@ from logging import getLogger
 from queue import Queue
 import signal
 import sys
-from threading import Thread
 
 from mission.controls import Controls
 from mission.events import CommandEvent, EVENT_TYPE
@@ -39,7 +38,6 @@ class Commanding(object):
 
         signal.signal(signal.SIGINT, signal_handler)
 
-        self.controls_thread = None
         self.uplink_services.start('Commands')
 
         self.user_input.run()
@@ -47,12 +45,12 @@ class Commanding(object):
     def command_handler(self, event):
         if event[EVENT_TYPE] == CommandEvent.ENTER_FLIGHT_MODE:
             self.enter_flight_mode()
-            self.commands.put(generate_packet(opcode_to_hex['flight_mode']))
+            self.send(generate_packet(opcode_to_hex['flight_mode']))
         elif event[EVENT_TYPE] == CommandEvent.EXIT_FLIGHT_MODE:
             self.exit_flight_mode()
-            self.commands.put(generate_packet(opcode_to_hex['non_flight_mode']))
+            self.send(generate_packet(opcode_to_hex['non_flight_mode']))
         elif event[EVENT_TYPE] == CommandEvent.TOGGLE_YAWPITCHROLL:
-            self.commands.put(generate_packet(opcode_to_hex['downlink_yawpitchroll']))
+            self.send(generate_packet(opcode_to_hex['downlink_yawpitchroll']))
 
     def enter_flight_mode(self):
         self.log.info('Entering flight mode')
