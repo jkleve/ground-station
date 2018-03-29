@@ -6,11 +6,32 @@ from .packet_handlers import dispatch_packet
 
 log = logging.getLogger(__name__)
 
-Packet = namedtuple('Packet', ['header', 'op_code', 'data_size', 'data', 'checksum', 'raw'])
-
 PACKET_HEADER = 0x42
 MAX_PACKET_SIZE = 64
 MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - 1 - 1 - 1  # minus 1 for header, op_code, & data_size
+
+
+class Packet(object):
+    def __init__(self, header, op_code, data_size, data, checksum, raw):
+        self.header = header
+        self.op_code = op_code
+        self.data_size = data_size
+        self.data = data
+        self.checksum = checksum
+        self.raw = raw
+
+    def __iter__(self):
+        for d in self.data:
+            yield d
+
+    def __repr__(self):
+        return 'Packet({self.header}, {self.op_code}, {self.data_size}, {self.data}, {self.checksum}, {self.raw})'\
+            .format(**locals())
+
+    def __str__(self):
+        opcode = hex(self.op_code)
+        return 'Packet(opcode={opcode}, num_data={self.data_size}, data={self.data}, checksum={self.checksum}, ' \
+               'raw={self.raw}'.format(**locals())
 
 
 def generate_packet(op_code, data=None):
