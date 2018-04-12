@@ -26,6 +26,7 @@ opcode_to_str = {
     0x23: 'flight_mode',
     0x24: 'non_flight_mode',
     0x25: 'terminate',
+    0x26: 'level_quad',
 
 
     # errors

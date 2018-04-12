@@ -27,7 +27,7 @@ class Commanding(object):
         ])
 
         self.user_input = UserInput(self.controls, self.commands)
-        self.user_input.non_flight()
+        self.user_input.flight()
 
         def signal_handler(sig_num, frame):
             self.log.info('Shutting down')
@@ -51,6 +51,8 @@ class Commanding(object):
             self.send(generate_packet(opcode_to_hex['non_flight_mode']))
         elif event[EVENT_TYPE] == CommandEvent.TOGGLE_YAWPITCHROLL:
             self.send(generate_packet(opcode_to_hex['downlink_yawpitchroll']))
+        elif event[EVENT_TYPE] == CommandEvent.LEVEL_QUAD:
+            self.send(generate_packet(opcode_to_hex['level_quad']))
 
     def enter_flight_mode(self):
         self.log.info('Entering flight mode')

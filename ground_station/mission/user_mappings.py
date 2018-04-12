@@ -77,6 +77,9 @@ flight_controls = {
         'f': {
             'key_down': (CommandEvent.EXIT_FLIGHT_MODE, ),
         },
+        'l': {
+            'key_down': (CommandEvent.LEVEL_QUAD, ),  # TODO make second argument an array of data bytes. empty if none. then clean up command_handler
+        },
     },
     'joystick': {
         'axis': {
