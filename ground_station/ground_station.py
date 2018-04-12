@@ -10,6 +10,16 @@ from utils import config_logs, connect
 from mission.commands import Commanding
 from mission.logs import get_logs
 
+__author__ = 'Jesse Kleve'
+# __license__ = ''
+__version__ = '0.1.0'
+PROGRAM_NAME = ''
+
+
+def program_description():
+    """Returns a string with a description of the program
+    """
+    return 'Ground station for quadcopter flight code'
 
 # import time
 # class MockConnection(object):
@@ -28,13 +38,7 @@ from mission.logs import get_logs
 #     return MockConnection()
 
 
-def main():
-    parser = ArgumentParser(description="Ground station for quadcopter flight code")
-    parser.add_argument('-ms', '--milliseconds', action='store_true', help="Print time with milli-seconds")
-    parser.add_argument('-u', '--uplink-frequency', type=int, default=10,
-                        help="Uplink frequency in Hz (Default = 10 Hz)")
-
-    args = parser.parse_args()
+def main(args):
 
     config_logs(get_logs(args.milliseconds))
 
@@ -80,7 +84,21 @@ def main():
         pass
 
 
-if __name__ == '__main__':
-    main()
+def cli():
+    parser = ArgumentParser(prog=PROGRAM_NAME, description=program_description())
+    parser.add_argument('-v', '--verbose', action='count', help='verbosity level. counting (e.g. -v, -vv)')
+    parser.add_argument('--version', action='version', version='%(prog)s {__version__}'.format(**globals()))
 
-    sys.exit(0)
+    parser.add_argument('-ms', '--milliseconds', action='store_true', help="Print time with milli-seconds")
+    parser.add_argument('-u', '--uplink-frequency', type=int, default=10,
+                        help="Uplink frequency in Hz (Default = 10 Hz)")
+
+    args = parser.parse_args()
+
+    # configure_logging(args.verbose)
+
+    return main(args)
+
+
+if __name__ == '__main__':
+    sys.exit(cli())
