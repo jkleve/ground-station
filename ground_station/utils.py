@@ -1,9 +1,50 @@
 from errno import EPERM, EACCES
 import logging
+import logging.config
 from pathlib import Path
 import serial
 import sys
 import time
+
+LOGGING_FORMAT = '%(asctime)s %(levelname)-8s %(name)s: %(message)s'
+LOGGING_DATEFMT = '%H:%M:%S'
+
+
+def configure_logging(verbosity):
+    logging_config = {
+        'version': 1,
+        'formatters': {
+            'brief': {
+                'format': LOGGING_FORMAT,
+                'datefmt': LOGGING_DATEFMT,
+            }
+        },
+        'handlers': {
+            'brief': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'brief',
+            }
+        },
+        'loggers': {
+            '': {  # root logger
+                'level': logging.WARNING,
+                'stream': sys.stdout,
+                'handlers': ['brief',],
+            },
+            'Receiver': {
+                'level': logging.WARNING,
+                # 'stream': sys.stdout,
+
+            }
+        }
+    }
+
+    if verbosity == 1:
+        logging_config['loggers']['']['level'] = logging.INFO
+    elif verbosity >= 2:
+        logging_config['loggers']['']['level'] = logging.DEBUG
+
+    logging.config.dictConfig(logging_config)
 
 
 def connect():
