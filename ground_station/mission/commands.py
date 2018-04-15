@@ -27,7 +27,7 @@ class Commanding(object):
         ])
 
         self.user_input = UserInput(self.controls, self.commands)
-        self.user_input.flight()
+        self.user_input.non_flight()
 
         def signal_handler(sig_num, frame):
             self.log.info('Shutting down')

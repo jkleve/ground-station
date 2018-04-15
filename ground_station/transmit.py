@@ -16,6 +16,6 @@ class Transmitter(object):
             if self.connection is not None:
                 self.log.info('Sending {}'.format(packet))
                 self.connection.write(struct.pack('B', byte))
-                time.sleep(0.01)  # Delay so apm has time to receive byte
+                time.sleep(0.005)  # Delay so apm has time to receive byte
 
 
