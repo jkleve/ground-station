@@ -18,7 +18,7 @@ class UserInput(object):
 
         self._input = Input(self._event_queue, self.stop_flag.is_set, non_flight_controls)
 
-        self._input_thread = Thread(target=self._input.run)
+        self._input_thread = Thread(name='User Input', target=self._input.run)
         self._input_thread.start()
 
         self._controls = controls_obj
