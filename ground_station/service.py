@@ -114,7 +114,7 @@ class ServiceManager(object):
 
             scheduler_service.stop_flag = Event()
             self._periodic(name, service.step)
-            scheduler_service.thread = Thread(target=self._scheduler.run)
+            scheduler_service.thread = Thread(name='{name}Service'.format(**locals()), target=self._scheduler.run)
             # scheduler_service.thread = Thread(target=self._periodic, args=(name, service.step))
             scheduler_service.thread.start()
 
