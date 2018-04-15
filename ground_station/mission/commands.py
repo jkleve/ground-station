@@ -39,6 +39,7 @@ class Commanding(object):
         signal.signal(signal.SIGINT, signal_handler)
 
         self.uplink_services.start('Commands')
+        self.uplink_services.start('Controls')
 
         self.user_input.run()
 
@@ -53,6 +54,8 @@ class Commanding(object):
             self.send(generate_packet(opcode_to_hex['downlink_yawpitchroll']))
         elif event[EVENT_TYPE] == CommandEvent.LEVEL_QUAD:
             self.send(generate_packet(opcode_to_hex['level_quad']))
+        elif event[EVENT_TYPE] == CommandEvent.DONE:
+            self.send(generate_packet(opcode_to_hex['done']))
 
     def enter_flight_mode(self):
         self.log.info('Entering flight mode')

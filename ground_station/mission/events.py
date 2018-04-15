@@ -16,4 +16,5 @@ class CommandEvent(Enum):
     EXIT_FLIGHT_MODE = 1
     TOGGLE_YAWPITCHROLL = 2
     LEVEL_QUAD = 3
+    DONE = 4
 

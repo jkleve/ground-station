@@ -95,6 +95,15 @@ flight_controls = {
 
 non_flight_controls = {
     'keyboard': {
+        '0': {
+            'key_down': (ControlEvent.THROTTLE, 100),
+        },
+        '-': {
+            'key_down': (ControlEvent.THROTTLE, 0),
+        },
+        'd': {
+            'key_down': (CommandEvent.DONE, ),
+        },
         'f': {
             'key_down': (CommandEvent.ENTER_FLIGHT_MODE, ),
         },

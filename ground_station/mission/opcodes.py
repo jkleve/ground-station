@@ -27,13 +27,15 @@ opcode_to_str = {
     0x24: 'non_flight_mode',
     0x25: 'terminate',
     0x26: 'level_quad',
+    0x29: 'run_test',
+    0x30: 'done',
 
 
     # errors
-    0x30: 'not_header',
-    0x31: 'invalid_packet',
-    0x32: 'invalid_checksum',
-    0x33: 'downlink_buffer_overrun',
+    0x90: 'not_header',
+    0x91: 'invalid_packet',
+    0x92: 'invalid_checksum',
+    0x93: 'downlink_buffer_overrun',
 
     # logs
     0x40: 'debug',
