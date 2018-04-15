@@ -15,7 +15,13 @@ class Transmitter(object):
         for byte in packet:
             if self.connection is not None:
                 self.log.info('Sending {}'.format(packet))
-                self.connection.write(struct.pack('B', byte))
+                self.write(struct.pack('B', byte))
                 time.sleep(0.005)  # Delay so apm has time to receive byte
+
+    def write(self, byte):
+        try:
+            self.connection.write(struct.pack('B', byte))
+        except Exception:
+            self.log.warning('Failed to write to connection')
 
 
